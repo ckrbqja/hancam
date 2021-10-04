@@ -26,14 +26,10 @@ export default {
   setup () {},
   created () {},
   mounted () {
-    if (this.code) {
-      this.getToken()
-    }
+    if (this.code) { this.getToken() }
   },
-  unmounted () {
-  },
+  unmounted () {},
   methods: {
-
     async getToken () {
       this.data = qs.stringify({
         client_id: process.env.KAKAO_CLIENT_ID,
@@ -43,12 +39,12 @@ export default {
       })
 
       kakaoLogin.post('', this.data).then(e => {
-        console.log(e)
         VueCookies.set('access_token', e.data.access_token, e.data.expires_in)
         VueCookies.set('refresh_token', e.data.refresh_token, e.data.refresh_token_expires_in)
+      }).catch(e => {
+        alert('실패 ㅠ')
       })
     }
-
   }
 }
 </script>
