@@ -1,18 +1,8 @@
 import axios from 'axios'
 
-export default {
-  mounted () {
-    console.log(1)
-  },
-  method: {
-    async $callAPI (url, methos, data) {
-      return axios({
-        methos,
-        url,
-        data
-      }).catch((e) => {
-        console.log(e)
-      })
-    }
-  }
-}
+const kakaoLogin = axios.create({
+  baseURL: process.env.KAKAO_URL,
+  headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+})
+
+export default kakaoLogin

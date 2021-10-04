@@ -1,11 +1,6 @@
 <template>
     <div>
-        <div>
-           {{code}}<br/>
-           {{access_token ? 'access_token:    '+access_token : ''}}<br/>
-           {{refresh_token ? 'refresh_token:    ' + refresh_token : ''}}
-        </div>
-        <a id="custom-login-btn" :href="link" target="_blank">
+        <a id="custom-login-btn" :href="openLink" target="_blank">
             <img
                 src="//k.kakaocdn.net/14/dn/btqCn0WEmI3/nijroPfbpCa4at5EIsjyf0/o.jpg"
                 width="222"
@@ -14,51 +9,44 @@
     </div>
 </template>
 <script>
-import ApiMixin from '../api'
-import axios from 'axios'
 import qs from 'qs'
+import VueCookies from 'vue-cookies'
+import kakaoLogin from '../api'
+
 export default {
   name: 'kakaoLogin',
-  mixins: [ApiMixin],
   component: {},
   data () {
     return {
-      title: 'hello woaarld',
-      link: `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=076145c532970856fc53ad5660094847&redirect_uri=http://localhost:8080/kakaologin`,
-      url: 'https://kauth.kakao.com/oauth/token',
-      methos: 'post',
+      openLink: `${process.env.KAKAO_OPEN_URL}?response_type=code&client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${process.env.KAKAO_REDIRECT_RUI}`,
       data: '',
-      code: this.$route.query.code,
-      access_token: '',
-      refresh_token: ''
+      code: this.$route.query.code
     }
   },
   setup () {},
   created () {},
   mounted () {
     if (this.code) {
-      console.log(this.getToken())
+      this.getToken()
     }
   },
   unmounted () {
   },
   methods: {
+
     async getToken () {
-      const aa = await axios({
-        method: 'post',
-        url: 'https://kauth.kakao.com/oauth/token',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        data: qs.stringify({
-          client_id: '076145c532970856fc53ad5660094847',
-          grant_type: 'authorization_code',
-          redirect_uri: 'http://localhost:8080/kakaologin',
-          code: this.code
-        })
+      this.data = qs.stringify({
+        client_id: process.env.KAKAO_CLIENT_ID,
+        grant_type: 'authorization_code',
+        redirect_uri: process.env.KAKAO_REDIRECT_RUI,
+        code: this.code
       })
-      this.access_token = aa.data.access_token
-      this.refresh_token = aa.data.refresh_token
+
+      kakaoLogin.post('', this.data).then(e => {
+        console.log(e)
+        VueCookies.set('access_token', e.data.access_token, e.data.expires_in)
+        VueCookies.set('refresh_token', e.data.refresh_token, e.data.refresh_token_expires_in)
+      })
     }
 
   }
